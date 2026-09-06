@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vishal Kashyap — Portfolio</title>
+<meta name="description" content="Vishal Kashyap — Software Engineering &amp; HR Intern Candidate. Java, Python, backend development, and people-first coordination.">
+
+<!-- ══════════════════════════════════════════════════════════════
+     FONTS — Fraunces (display serif) + IBM Plex Sans (body) + IBM Plex Mono (small labels/code accents)
+     ══════════════════════════════════════════════════════════════ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   1. DESIGN TOKENS
+   Change colors/fonts here and they cascade through the whole site.
+   ══════════════════════════════════════════════════════════════ */
+:root{
+  --ink:        #FFFFFF;   /* base background — white */
+  --surface:    #F6F0FE;   /* card / panel surface — pale violet tint */
+  --surface-2:  #EDE1FC;   /* raised surface (hover, inputs) — pale lilac tint */
+  --line:       rgba(76,29,149,0.12); /* hairline borders — soft violet-charcoal */
+
+  --accent:       #7C3AED;   /* primary accent — vivid violet */
+  --accent-deep:   #5B21B6;   /* deep violet, for buttons / stronger emphasis */
+  --accent-2:        #F43F5E;   /* secondary accent — hot rose/pink (energy, contrast) */
+
+  --ink-text:   #241934;   /* primary text on white — deep violet-charcoal, not pure black */
+  --muted-text: #6E5C82;   /* secondary text */
+  --faint-text: #9C8FAE;   /* tertiary / fine print */
+
+  --serif:  'Fraunces', Georgia, serif;
+  --sans:   'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono:   'IBM Plex Mono', 'SF Mono', monospace;
+
+  --wrap: 1080px;
+  --pad: clamp(20px, 5vw, 64px);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   1b. DARK MODE — same tokens, re-tuned for a dark surface.
+   Toggled by setting data-theme="dark" on <html> (see the toggle
+   button in the nav + the THEME + TORCH script at the bottom).
+   Paired with "torch mode": a soft flashlight glow that follows the
+   cursor/finger and lights up whatever section it lands on — like a
+   college student reading by torchlight after lights-out.
+   ══════════════════════════════════════════════════════════════ */
+:root[data-theme="dark"]{
+  --ink:        #100A1C;   /* base background — near-black, violet-tinted */
+  --surface:    #1C1330;   /* card / panel surface */
+  --surface-2:  #271B40;   /* raised surface (hover, inputs) */
+  --line:       rgba(255,255,255,0.09); /* hairline borders */
+
+  --accent:       #A78BFA;   /* primary accent — lighter violet for dark bg */
+  --accent-deep:   #C4B5FD;   /* used for headings/labels, needs to read on dark */
+  --accent-2:      #FB7185;   /* secondary accent — warm rose, technical bits */
+
+  --ink-text:   #F3EEFF;   /* primary text on dark — soft lavender-white */
+  --muted-text: #B6A7C9;   /* secondary text */
+  --faint-text: #6B5B80;   /* tertiary / fine print */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   2. RESET & BASE
+   ══════════════════════════════════════════════════════════════ */
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
+@media (prefers-reduced-motion:reduce){ html{ scroll-behavior:auto; } *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
+
+body{
+  font-family: var(--sans);
+  background: var(--ink);
+  color: var(--ink-text);
+  line-height:1.6;
+  font-weight:300;
+  overflow-x:hidden;
+  transition: background-color .4s ease, color .4s ease;
+}
+
+/* Fixed color wash behind everything — the moving tech-symbol canvas (below) sits on top of this,
+   and both are pinned in place (position:fixed) so the whole background behaves like a looping
+   video that never scrolls with the page. */
+body::before{
+  content:"";
+  position:fixed; inset:0;
+  z-index:-3;
+  background-color: var(--ink);
+  background-image:
+    radial-gradient(ellipse 70% 55% at 12% -8%, rgba(124,58,237,0.16), transparent 60%),
+    radial-gradient(ellipse 70% 55% at 100% 10%, rgba(244,63,94,0.13), transparent 60%);
+  background-attachment: fixed, fixed;
+}
+body::after{
+  content:"";
+  position:fixed; inset:0; z-index:-2;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.12) 60%, rgba(255,255,255,0.4) 100%);
+  pointer-events:none;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ANIMATED BACKGROUND — floating tech symbols, fixed behind all content.
+   Lives on a <canvas> at z-index:-1 — the TOPMOST of the background
+   layers (still behind every real section, which have no z-index set
+   and so stack above it automatically) — is pointer-events:none so it
+   never blocks clicks or selection, and is drawn with enough opacity
+   to actually read as a moving pattern rather than disappear.
+   All tuning knobs (symbols, count, speed, size, colors) are in the
+   commented JS config block near the bottom of the file.
+   ══════════════════════════════════════════════════════════════ */
+#bg-canvas{
+  position:fixed; inset:0;
+  z-index:-1;
+  width:100%; height:100%;
+  pointer-events:none;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TORCH MODE — dark-mode-only spotlight that follows the cursor
+   (or a finger, on touch) and lights up the section underneath it,
+   like a college student under the blanket with a torch after
+   lights-out. Sits above everything (z-index:150+) but
+   pointer-events:none means it never blocks clicks, taps or text
+   selection on the content beneath it. Both pieces stay display:none
+   /* opacity:0 until .active is added by the THEME + TORCH script,
+   and are skipped entirely for prefers-reduced-motion users.
+   ══════════════════════════════════════════════════════════════ */
+.torch-overlay{
+  position:fixed; inset:0; z-index:150;
+  pointer-events:none; opacity:0;
+  transition:opacity .5s ease;
+  background: radial-gradient(circle 260px at var(--torch-x,50%) var(--torch-y,30%),
+              transparent 0%, rgba(2,8,5,0.45) 42%, rgba(2,8,5,0.93) 72%);
+}
+.torch-overlay.active{ opacity:1; }
+
+.torch-beam{
+  position:fixed; top:0; left:0; z-index:151;
+  pointer-events:none; opacity:0;
+  font-size:26px; line-height:1;
+  transform:translate(-30%,-65%) rotate(-35deg);
+  filter:drop-shadow(0 0 12px rgba(255,214,120,0.6));
+  transition:opacity .3s ease;
+}
+.torch-beam.active{ opacity:1; }
+
+@media (max-width:760px){
+  .torch-overlay{
+    background: radial-gradient(circle 170px at var(--torch-x,50%) var(--torch-y,30%),
+                transparent 0%, rgba(2,8,5,0.45) 40%, rgba(2,8,5,0.93) 70%);
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .torch-overlay, .torch-beam{ display:none; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CUSTOM CURSOR — dark-mode only. A small glowing dot sits exactly
+   at the pointer (the torch-beam emoji above is offset, so this
+   gives a precise click point), trailed by fading sparks drawn on
+   #cursorTrailCanvas. The real OS cursor is hidden in dark mode so
+   this fully replaces it — with `cursor:pointer`/`text` put back on
+   links, buttons and form fields so it's still obvious what's
+   clickable or typeable.
+   ══════════════════════════════════════════════════════════════ */
+.cursor-dot{
+  position:fixed; top:0; left:0; z-index:152;
+  width:9px; height:9px; border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 10px 2px var(--accent), 0 0 26px 8px var(--accent-2);
+  transform:translate(-50%,-50%);
+  pointer-events:none; opacity:0;
+  transition:opacity .3s ease;
+}
+.cursor-dot.active{ opacity:1; }
+
+#cursorTrailCanvas{
+  position:fixed; inset:0; z-index:149;
+  pointer-events:none;
+}
+
+:root[data-theme="dark"] body{ cursor:none; }
+:root[data-theme="dark"] a,
+:root[data-theme="dark"] button{ cursor:pointer; }
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] textarea{ cursor:text; }
+@media (hover:none){
+  :root[data-theme="dark"] body{ cursor:auto; }
+}
+@media (prefers-reduced-motion: reduce){
+  .cursor-dot, #cursorTrailCanvas{ display:none; }
+  :root[data-theme="dark"] body{ cursor:auto; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   KONAMI EASTER EGG TOAST — the matrix-rain canvas it triggers is
+   built entirely in JS (no markup needed); this is just the little
+   "achievement unlocked" banner that appears with it.
+   ══════════════════════════════════════════════════════════════ */
+.egg-toast{
+  position:fixed; left:50%; bottom:32px; z-index:210;
+  transform:translate(-50%,20px); opacity:0;
+  background:var(--surface); color:var(--ink-text);
+  border:1px solid var(--accent); border-radius:8px;
+  padding:14px 22px; font-family:var(--mono); font-size:0.85rem;
+  box-shadow:0 8px 30px rgba(0,0,0,0.35);
+  pointer-events:none; transition:opacity .35s ease, transform .35s ease;
+  text-align:center;
+}
+.egg-toast.show{ opacity:1; transform:translate(-50%,0); }
+
+img{ max-width:100%; display:block; }
+a{ color:inherit; text-decoration:none; }
+ul{ list-style:none; }
+
+h1,h2,h3{ font-family:var(--serif); font-weight:500; letter-spacing:-0.01em; color:var(--ink-text); }
+
+.wrap{ max-width:var(--wrap); margin:0 auto; padding-left:var(--pad); padding-right:var(--pad); }
+section{ padding:clamp(56px,10vw,120px) 0; position:relative; }
+.section-head{ margin-bottom:clamp(32px,6vw,56px); max-width:640px; }
+.section-head .tag{ font-family:var(--mono); font-size:0.78rem; color:var(--accent-deep); letter-spacing:0.02em; }
+.section-head h2{ font-size:clamp(1.7rem,3.6vw,2.6rem); margin-top:10px; }
+.section-head p{ color:var(--muted-text); margin-top:14px; max-width:56ch; }
+
+.divider{ height:1px; background:var(--line); border:0; }
+
+/* focus visibility */
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{
+  outline:2px solid var(--accent); outline-offset:3px; border-radius:2px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3. NAVIGATION
+   ══════════════════════════════════════════════════════════════ */
+header{
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  background:rgba(255,255,255,0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--line);
+  transition: background-color .4s ease, border-color .4s ease;
+}
+:root[data-theme="dark"] header{
+  background: rgba(11,15,13,0.75);
+}
+.nav{ display:flex; align-items:center; justify-content:space-between; height:72px; }
+.nav .logo{ font-family:var(--serif); font-size:1.15rem; font-weight:600; color:var(--ink-text); }
+.nav .logo span{ color:var(--accent); }
+.nav ul{ display:flex; gap:clamp(16px,2.5vw,34px); }
+.nav a{ font-size:0.92rem; color:var(--muted-text); transition:color .2s ease; position:relative; }
+.nav a:hover{ color:var(--ink-text); }
+.nav a::after{
+  content:""; position:absolute; left:0; bottom:-6px; width:0; height:1px; background:var(--accent);
+  transition:width .25s ease;
+}
+.nav a:hover::after{ width:100%; }
+
+.nav-right{ display:flex; align-items:center; gap:clamp(16px,2.5vw,34px); }
+
+.nav-toggle{ display:none; background:none; border:0; color:var(--ink-text); font-size:1.4rem; cursor:pointer; }
+
+/* Dark mode / torch toggle — moon while in light mode, torch once dark mode is on */
+.theme-toggle{
+  display:flex; align-items:center; justify-content:center;
+  width:38px; height:38px; border-radius:50%;
+  border:1px solid var(--line); background:var(--surface);
+  cursor:pointer; font-size:1rem; line-height:1;
+  transition: background-color .3s ease, border-color .3s ease, transform .2s ease;
+}
+.theme-toggle:hover{ transform:rotate(-14deg) scale(1.08); border-color:var(--accent-deep); }
+.theme-toggle:active{ transform:scale(0.94); }
+
+/* Sound-effects toggle — off by default; a subtle click/hover blip while on */
+.sound-toggle{
+  display:flex; align-items:center; justify-content:center;
+  width:38px; height:38px; border-radius:50%;
+  border:1px solid var(--line); background:var(--surface);
+  cursor:pointer; font-size:1rem; line-height:1;
+  transition: background-color .3s ease, border-color .3s ease, transform .2s ease;
+}
+.sound-toggle:hover{ transform:scale(1.08); border-color:var(--accent-deep); }
+.sound-toggle:active{ transform:scale(0.94); }
+
+@media (max-width:760px){
+  .nav ul{
+    position:fixed; top:72px; right:0; left:0;
+    background:var(--surface); border-bottom:1px solid var(--line);
+    flex-direction:column; padding:20px var(--pad); gap:18px;
+    transform:translateY(-8px); opacity:0; pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .nav ul.open{ opacity:1; transform:translateY(0); pointer-events:auto; }
+  .nav-toggle{ display:block; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   4. HERO
+   ══════════════════════════════════════════════════════════════ */
+.hero{ min-height:100svh; display:flex; align-items:center; padding-top:72px; }
+.hero-grid{ display:grid; grid-template-columns:1.5fr 1fr; gap:48px; align-items:end; width:100%; }
+.hero .eyebrow{
+  font-family:var(--mono); font-size:0.85rem; color:var(--accent-deep);
+  display:flex; align-items:center; gap:10px;
+}
+.hero .eyebrow .dot{ width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px rgba(244,63,94,0.22); }
+
+/* Availability status badge — a dated pill so "open to internships" reads as current, not stale */
+.status-badge{
+  background:var(--surface); border:1px solid var(--line);
+  padding:7px 16px; border-radius:999px; width:fit-content;
+}
+.status-badge .dot{ animation: pulseDot 2.2s ease-in-out infinite; }
+@keyframes pulseDot{
+  0%,100%{ box-shadow:0 0 0 3px rgba(244,63,94,0.22); }
+  50%{ box-shadow:0 0 0 7px rgba(244,63,94,0.1); }
+}
+@media (prefers-reduced-motion: reduce){ .status-badge .dot{ animation:none; } }
+
+.hero h1{
+  font-size:clamp(2.6rem,7vw,5rem); line-height:1.02; margin-top:18px;
+  opacity:0; transform:translateY(14px);
+  animation: rise .9s cubic-bezier(.2,.7,.2,1) .15s forwards;
+}
+.hero .role-line{
+  margin-top:20px; font-size:clamp(1.05rem,2.2vw,1.35rem); color:var(--muted-text); max-width:44ch;
+  opacity:0; transform:translateY(10px);
+  animation: rise .9s cubic-bezier(.2,.7,.2,1) .4s forwards;
+}
+.hero .role-line strong{ color:var(--ink-text); font-weight:500; }
+@keyframes rise{ to{ opacity:1; transform:translateY(0); } }
+
+.hero-side{
+  border-left:1px solid var(--line); padding-left:28px;
+  opacity:0; animation: rise .9s cubic-bezier(.2,.7,.2,1) .6s forwards;
+}
+.hero-side .stat{ margin-bottom:20px; }
+.hero-side .stat b{ display:block; font-family:var(--serif); font-size:1.9rem; color:var(--accent-deep); font-weight:500; }
+.hero-side .stat span{ font-size:0.85rem; color:var(--muted-text); }
+
+.hero-actions{ display:flex; gap:14px; margin-top:34px; flex-wrap:wrap; }
+.btn{
+  font-family:var(--sans); font-size:0.92rem; font-weight:500; padding:13px 24px;
+  border-radius:3px; cursor:pointer; transition:all .2s ease; border:1px solid transparent;
+  display:inline-flex; align-items:center; gap:8px;
+}
+.btn-primary{ background:var(--accent-deep); color:#FFFFFF; }
+.btn-primary:hover{ background:#4C1D95; }
+.btn-ghost{ border-color:var(--line); color:var(--ink-text); }
+.btn-ghost:hover{ border-color:var(--accent-deep); color:var(--accent-deep); }
+.btn-resume{ border-color:var(--accent); color:var(--accent-deep); }
+.btn-resume:hover{ background:var(--accent); color:#FFFFFF; border-color:var(--accent); }
+
+@media (max-width:820px){
+  .hero-grid{ grid-template-columns:1fr; }
+  .hero-side{ border-left:0; border-top:1px solid var(--line); padding-left:0; padding-top:24px; display:flex; gap:32px; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5. ABOUT
+   ══════════════════════════════════════════════════════════════ */
+.about-grid{ display:grid; grid-template-columns:1fr 1fr; gap:56px; }
+.about-grid p{ color:var(--muted-text); margin-bottom:16px; }
+.about-grid p strong{ color:var(--ink-text); font-weight:500; }
+.strengths{ display:flex; flex-wrap:wrap; gap:10px; align-content:flex-start; }
+.strengths li{
+  font-family:var(--mono); font-size:0.8rem; color:var(--accent-2);
+  border:1px solid rgba(244,63,94,0.4); padding:7px 13px; border-radius:3px;
+}
+@media (max-width:820px){ .about-grid{ grid-template-columns:1fr; } }
+
+/* ══════════════════════════════════════════════════════════════
+   6. EXPERIENCE — vertical timeline (chronology is a genuine sequence)
+   ══════════════════════════════════════════════════════════════ */
+.timeline{ position:relative; padding-left:36px; border-left:1px solid var(--line); }
+.tl-item{ position:relative; padding-bottom:48px; }
+.tl-item:last-child{ padding-bottom:0; }
+.tl-item::before{
+  content:""; position:absolute; left:-41px; top:4px;
+  width:11px; height:11px; border-radius:50%;
+  background:var(--ink); border:2px solid var(--accent);
+}
+.tl-role{ font-family:var(--serif); font-size:1.25rem; font-weight:500; }
+.tl-meta{ font-family:var(--mono); font-size:0.78rem; color:var(--faint-text); margin-top:4px; display:flex; gap:10px; flex-wrap:wrap; }
+.tl-meta .org{ color:var(--accent-deep); }
+.tl-item ul{ margin-top:14px; display:flex; flex-direction:column; gap:9px; }
+.tl-item ul li{ color:var(--muted-text); padding-left:18px; position:relative; font-size:0.96rem; }
+.tl-item ul li::before{ content:"—"; position:absolute; left:0; color:var(--faint-text); }
+
+/* ══════════════════════════════════════════════════════════════
+   7. PROJECTS
+   ══════════════════════════════════════════════════════════════ */
+.projects{ display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+.proj{ background:var(--ink); padding:34px; display:flex; flex-direction:column; }
+.proj h3{ font-size:1.25rem; }
+.proj .proj-tag{ font-family:var(--mono); font-size:0.75rem; color:var(--faint-text); margin-top:6px; }
+.proj p{ color:var(--muted-text); margin-top:14px; font-size:0.95rem; flex:1; }
+.proj .stack{ margin-top:18px; font-family:var(--mono); font-size:0.75rem; color:var(--accent-2); }
+@media (max-width:760px){ .projects{ grid-template-columns:1fr; } }
+
+/* GitHub activity — pinned repo cards + stats, sourced as plain <img>s from
+   the public github-readme-stats service. Two versions of each image are
+   included (gh-light / gh-dark) since the images themselves can't react to
+   the toggle — CSS just shows whichever matches the current theme. */
+.github-activity{ margin-top:44px; padding-top:36px; border-top:1px solid var(--line); }
+.gh-heading{ font-family:var(--serif); font-size:1.2rem; font-weight:500; margin-bottom:16px; }
+.gh-pins{ display:flex; flex-wrap:wrap; gap:16px; }
+.gh-pins a{ display:block; border-radius:8px; overflow:hidden; transition:transform .2s ease; }
+.gh-pins a:hover{ transform:translateY(-3px); }
+.gh-pins img{ display:block; max-width:100%; border-radius:8px; }
+.gh-stats{ display:flex; flex-wrap:wrap; gap:16px; margin-top:20px; }
+.gh-stats img{ display:block; max-width:100%; border-radius:8px; }
+.gh-dark{ display:none; }
+:root[data-theme="dark"] .gh-light{ display:none; }
+:root[data-theme="dark"] .gh-dark{ display:block; }
+@media (max-width:600px){ .gh-pins img, .gh-stats img{ width:100%; } }
+
+/* ══════════════════════════════════════════════════════════════
+   7b. WRITING
+   ══════════════════════════════════════════════════════════════ */
+.writing-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+.post{ background:var(--ink); padding:30px; display:flex; flex-direction:column; gap:10px; transition:background-color .2s ease; }
+.post:hover{ background:var(--surface); }
+.post-date{ font-family:var(--mono); font-size:0.75rem; color:var(--faint-text); }
+.post h3{ font-size:1.05rem; line-height:1.3; }
+.post p:not(.post-date){ color:var(--muted-text); font-size:0.9rem; flex:1; }
+.post-link{ font-family:var(--mono); font-size:0.8rem; color:var(--accent-deep); }
+@media (max-width:900px){ .writing-grid{ grid-template-columns:1fr; } }
+
+/* ══════════════════════════════════════════════════════════════
+   8. SKILLS
+   ══════════════════════════════════════════════════════════════ */
+.skills-grid{ display:grid; grid-template-columns:1.1fr 0.9fr; gap:56px; }
+.skill-block{ margin-bottom:28px; }
+.skill-block:last-child{ margin-bottom:0; }
+.skill-block h4{
+  font-family:var(--sans); font-weight:500; font-size:0.95rem; color:var(--ink-text);
+  margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--line);
+}
+.tag-row{ display:flex; flex-wrap:wrap; gap:9px; }
+.tag-row li{
+  font-size:0.85rem; padding:7px 13px; border-radius:3px;
+  background:var(--surface); color:var(--muted-text); border:1px solid var(--line);
+}
+.soft-list{ display:flex; flex-direction:column; gap:0; }
+.soft-list li{
+  padding:13px 0; border-bottom:1px solid var(--line); color:var(--muted-text);
+  display:flex; align-items:center; gap:12px; font-size:0.95rem;
+}
+.soft-list li::before{ content:""; width:5px; height:5px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+@media (max-width:820px){ .skills-grid{ grid-template-columns:1fr; } }
+
+/* ══════════════════════════════════════════════════════════════
+   9. LEADERSHIP / EDUCATION / CERTIFICATIONS
+   ══════════════════════════════════════════════════════════════ */
+.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:56px; }
+.edu-item, .lead-item{ padding:18px 0; border-bottom:1px solid var(--line); }
+.edu-item:first-child, .lead-item:first-child{ padding-top:0; }
+.edu-item h4, .lead-item h4{ font-family:var(--serif); font-weight:500; font-size:1.05rem; }
+.edu-item .edu-meta{ font-family:var(--mono); font-size:0.78rem; color:var(--accent-deep); margin-top:5px; }
+.lead-item p{ color:var(--muted-text); font-size:0.92rem; margin-top:6px; }
+.cert-list{ margin-top:26px; }
+.cert-list li{ display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line); font-size:0.92rem; color:var(--muted-text); }
+.cert-list li span{ font-family:var(--mono); font-size:0.78rem; color:var(--faint-text); }
+@media (max-width:820px){ .two-col{ grid-template-columns:1fr; } }
+
+/* ══════════════════════════════════════════════════════════════
+   10. CONTACT
+   ══════════════════════════════════════════════════════════════ */
+.contact-grid{ display:grid; grid-template-columns:0.9fr 1.1fr; gap:56px; }
+.contact-links{ display:flex; flex-direction:column; gap:4px; }
+.contact-links a{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 0; border-bottom:1px solid var(--line); font-size:1rem; color:var(--ink-text);
+  transition:padding-left .2s ease, color .2s ease;
+}
+.contact-links a:hover{ padding-left:8px; color:var(--accent-deep); }
+.contact-links a .sub{ font-family:var(--mono); font-size:0.78rem; color:var(--faint-text); }
+
+/* Resume download button — styled as a button, not a plain contact row */
+.contact-links .resume-btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:14px 22px; margin-bottom:14px; border-bottom:none; border-radius:4px;
+  font-family:var(--sans); font-weight:500; font-size:0.95rem;
+  background:var(--accent-deep); color:#FFFFFF;
+  transition:background-color .2s ease, transform .2s ease;
+}
+.contact-links .resume-btn:hover{
+  background:var(--accent); color:#FFFFFF; transform:translateY(-1px); padding:14px 22px;
+}
+
+form{ display:flex; flex-direction:column; gap:16px; }
+.form-row{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+label{ font-size:0.82rem; color:var(--muted-text); margin-bottom:7px; display:block; }
+input, textarea{
+  width:100%; background:var(--surface); border:1px solid var(--line); border-radius:3px;
+  padding:13px 14px; color:var(--ink-text); font-family:var(--sans); font-size:0.95rem;
+  transition:border-color .2s ease;
+}
+input:focus, textarea:focus{ border-color:var(--accent); }
+textarea{ resize:vertical; min-height:120px; }
+.form-note{ font-size:0.8rem; color:var(--faint-text); }
+@media (max-width:820px){ .contact-grid{ grid-template-columns:1fr; } .form-row{ grid-template-columns:1fr; } }
+
+footer{ padding:32px 0; border-top:1px solid var(--line); }
+footer .wrap{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+footer p{ font-size:0.82rem; color:var(--faint-text); }
+footer .socials{ display:flex; gap:16px; }
+footer .socials a{ font-size:0.82rem; color:var(--muted-text); }
+footer .socials a:hover{ color:var(--accent-deep); }
+</style>
+</head>
+<body>
+
+<!-- Animated background layer — fixed, behind all content, ignores clicks. See #bg-canvas CSS
+     and the "ANIMATED BACKGROUND" script at the bottom of the file to tune it. -->
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+<!-- TORCH MODE — active only while dark mode is on (see THEME + TORCH script
+     at the bottom). The overlay dims the page and cuts a soft glow around the
+     cursor/finger; the beam is a small torch icon that rides along with it.
+     Both are pointer-events:none so they never block clicks or taps. -->
+<div class="torch-overlay" id="torchOverlay" aria-hidden="true"></div>
+<div class="torch-beam" id="torchBeam" aria-hidden="true">🔦</div>
+
+<!-- CUSTOM CURSOR — dark-mode only. A precise glowing dot plus a fading
+     spark trail rendered on a canvas, layered with the torch above. -->
+<canvas id="cursorTrailCanvas" aria-hidden="true"></canvas>
+<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     HEADER / NAV
+     ══════════════════════════════════════════════════════════════ -->
+<header>
+  <nav class="wrap nav">
+    <a href="#top" class="logo">VK<span>.</span></a>
+    <div class="nav-right">
+      <ul id="navLinks">
+        <li><a href="#about">About</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#writing">Writing</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#education">Education</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <!-- Dark mode toggle — shows a moon in light mode; once dark mode is
+           on, the icon becomes a torch and a matching torch-beam spotlight
+           follows the cursor/finger around the page. -->
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+      </button>
+      <!-- Sound-effects toggle — off by default; turns on subtle click/hover blips -->
+      <button class="sound-toggle" id="soundToggle" aria-label="Toggle sound effects" title="Toggle sound effects">
+        <span id="soundIcon">🔈</span>
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+    </div>
+  </nav>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════════
+     HERO — UPDATE: headline, role line, and the three stats below
+     ══════════════════════════════════════════════════════════════ -->
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <!-- UPDATE: keep this date current — it's what makes "open to internships" feel real -->
+      <p class="eyebrow status-badge"><span class="dot"></span> Open to internships · Available from Jan 2027</p>
+      <h1>Vishal Kashyap</h1>
+      <p class="role-line">
+        <strong>MCA candidate</strong> who builds backend systems in Java and Python, and who has
+        spent equal time coordinating people — recruitment, onboarding, and cross-team delivery.
+      </p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn btn-primary">Start a conversation</a>
+        <a href="#experience" class="btn btn-ghost">See the work</a>
+        <!-- UPDATE: replace resume.pdf with the path to your actual PDF resume -->
+        <a href="resume.pdf" download class="btn btn-ghost btn-resume">Resume <span aria-hidden="true">↓</span></a>
+      </div>
+    </div>
+    <div class="hero-side">
+      <!-- UPDATE: swap these three stats for whatever best proves your range -->
+      <div class="stat"><b>1+ yr</b><span>Java &amp; backend development</span></div>
+      <div class="stat"><b>15+</b><span>Client deployments coordinated</span></div>
+      <div class="stat"><b>2</b><span>Independent AI/ML-integrated projects</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     ABOUT — UPDATE: summary paragraphs and the core-strengths tag list
+     ══════════════════════════════════════════════════════════════ -->
+<section id="about">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="tag">01 — About</p>
+      <h2>Engineering discipline, people-first instincts.</h2>
+    </div>
+    <div class="about-grid">
+      <div>
+        <p>
+          I'm a Computer Science (MCA) candidate with hands-on experience designing, developing, and
+          testing software end-to-end — <strong>REST APIs, an object-oriented Java codebase, and an
+          AI/ML-integrated calculator</strong> built on the Google Gemini API. I pick up new tools and
+          methods quickly, and I apply feedback and established practices to improve reliability and
+          performance rather than just shipping and moving on.
+        </p>
+        <p>
+          Alongside that, I've worked inside HR and client-operations teams — coordinating recruitment
+          and onboarding, maintaining audit-ready records, and keeping stakeholders aligned across
+          <strong>15+ on-site technology deployments</strong>. That combination means I read requirements
+          the way both an engineer and a coordinator would: precisely, and with the people on the other
+          end of them in mind.
+        </p>
+      </div>
+      <ul class="strengths">
+        <!-- UPDATE: add/remove strengths freely, order doesn't matter -->
+        <li>Clear, professional communication</li>
+        <li>Recruitment &amp; onboarding coordination</li>
+        <li>Analytical &amp; logical problem-solving</li>
+        <li>Cross-team collaboration</li>
+        <li>Attention to detail</li>
+        <li>Precision under deadline pressure</li>
+        <li>Self-directed learning</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════
+     EXPERIENCE — UPDATE: add a new .tl-item block to add a role;
+     each block is fully self-contained (title, org, dates, bullets)
+     ══════════════════════════════════════════════════════════════ -->
+<section id="experience">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="tag">02 — Experience</p>
+      <h2>Where the work happened.</h2>
+    </div>
+    <div class="timeline">
+
+      <div class="tl-item">
+        <p class="tl-role">Business Development Executive — IT Deployments</p>
+        <p class="tl-meta"><span class="org">Maxnerva Technology Services</span><span>Oct 2025 – Jan 2026</span></p>
+        <ul>
+          <li>Partnered directly with client HR and IT teams to coordinate on-site Cloud, AI, and IoT deployments across 15+ sites, gathering requirements and troubleshooting issues in real time.</li>
+          <li>Applied established methodologies to improve availability, reliability, and performance, cutting average issue-resolution time by roughly 20% with zero critical downtime incidents.</li>
+          <li>Kept stakeholders aligned through consistent status reporting and documentation, strengthening client relationships across diverse teams and environments.</li>
+        </ul>
+      </div>
+
+      <div class="tl-item">
+        <p class="tl-role">Human Resource Trainee</p>
+        <p class="tl-meta"><span class="org">Motherson</span><span>Jun 2025 – Aug 2025</span></p>
+        <ul>
+          <li>Supported recruitment and onboarding for 20+ new hires, including interview coordination and documentation, requiring clear communication with candidates and hiring teams.</li>
+          <li>Prepared and maintained 10+ administrative and HR reports per month, keeping data audit-ready and well organized.</li>
+          <li>Managed employee records, leave details, and logistics invoices for a team of 50+ with close attention to detail and confidentiality, maintaining 100% data accuracy.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════
+     PROJECTS — UPDATE: duplicate a .proj block for each new project
+     ══════════════════════════════════════════════════════════════ -->
+<section id="projects">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="tag">03 — Projects</p>
+      <h2>Independent builds.</h2>
+      <p>Two projects built end-to-end, from problem framing to a working, tested tool.</p>
+    </div>
+    <div class="projects">
+
+      <div class="proj">
+        <h3>Smart Calc — AI-Integrated Calculator</h3>
+        <p class="proj-tag">Independent project · 2025</p>
+        <p>
+          A web application that solves complex, multi-step mathematical expressions from natural-language
+          and LaTeX input. Integrates the Google Gemini API with a LaTeX parser, converting raw input into
+          structured, step-by-step solutions — with request/response handling and troubleshooting owned end-to-end.
+        </p>
+        <p class="stack">Java · Google Gemini API · LaTeX parsing · REST</p>
+      </div>
+
+      <div class="proj">
+        <h3>Word Art Generator — Pattern &amp; Logic Engine</h3>
+        <p class="proj-tag">Independent project · 2025</p>
+        <p>
+          A dependency-free Java package that generates pattern-based text art using loops, conditionals,
+          and algorithmic logic. Built with object-oriented design for clean separation of concerns —
+          reusable and IDE-independent, following maintainable coding standards.
+        </p>
+        <p class="stack">Java · OOP · Data Structures &amp; Algorithms</p>
+      </div>
+
+    </div>
+
+    <!-- GITHUB ACTIVITY — UPDATE: swap "your-handle" for your real GitHub username
+         (in every URL below) and the two repo names for your actual repo names.
+         These are just images from the public github-readme-stats service, so
+         there's no API key or backend involved — they update on their own. -->
+    <div class="github-activity">
+      <h3 class="gh-heading">GitHub activity</h3>
+      <div class="gh-pins">
+        <a href="https://github.com/your-handle/smart-calc-ai" target="_blank" rel="noopener">
+          <img class="gh-light" loading="lazy" alt="Smart Calc AI repo card"
+               src="https://github-readme-stats.vercel.app/api/pin/?username=your-handle&repo=smart-calc-ai&title_color=5B21B6&icon_color=F43F5E&text_color=6E5C82&bg_color=00000000&border_color=EDE1FC">
+          <img class="gh-dark" loading="lazy" alt="Smart Calc AI repo card"
+               src="https://github-readme-stats.vercel.app/api/pin/?username=your-handle&repo=smart-calc-ai&title_color=C4B5FD&icon_color=FB7185&text_color=B6A7C9&bg_color=00000000&border_color=271B40">
+        </a>
+        <a href="https://github.com/your-handle/word-art-generator" target="_blank" rel="noopener">
+          <img class="gh-light" loading="lazy" alt="Word Art Generator repo card"
+               src="https://github-readme-stats.vercel.app/api/pin/?username=your-handle&repo=word-art-generator&title_color=5B21B6&icon_color=F43F5E&text_color=6E5C82&bg_color=00000000&border_color=EDE1FC">
+          <img class="gh-dark" loading="lazy" alt="Word Art Generator repo card"
+               src="https://github-readme-stats.vercel.app/api/pin/?username=your-handle&repo=word-art-generator&title_color=C4B5FD&icon_color=FB7185&text_color=B6A7C9&bg_color=00000000&border_color=271B40">
+        </a>
+      </div>
+      <div class="gh-stats">
+        <img class="gh-light" loading="lazy" alt="GitHub stats"
+             src="https://github-readme-stats.vercel.app/api?username=your-handle&show_icons=true&hide_border=true&title_color=5B21B6&icon_color=F43F5E&text_color=6E5C82&bg_color=00000000">
+        <img class="gh-dark" loading="lazy" alt="GitHub stats"
+             src="https://github-readme-stats.vercel.app/api?username=your-handle&show_icons=true&hide_border=true&title_color=C4B5FD&icon_color=FB7185&text_color=B6A7C9&bg_color=00000000">
+        <img class="gh-light" loading="lazy" alt="GitHub streak stats"
+             src="https://streak-stats.demolab.com/?user=your-handle&hide_border=true&background=00000000&ring=7C3AED&fire=F43F5E&currStreakLabel=5B21B6">
+        <img class="gh-dark" loading="lazy" alt="GitHub streak stats"
+             src="https://streak-stats.demolab.com/?user=your-handle&hide_border=true&background=00000000&ring=A78BFA&fire=FB7185&currStreakLabel=C4B5FD">
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════
+     WRITING — UPDATE: replace href="#" on each post with a link to
+     your actual write-up (Medium, Hashnode, dev.to, or your own blog),
+     and swap in real dates once published.
+     ══════════════════════════════════════════════════════════════ -->
+<section id="writing">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="tag">04 — Writing</p>
+      <h2>Notes from building things.</h2>
+      <p>Short write-ups on what actually happened while shipping the projects above — the parts that don't fit in a resume bullet.</p>
+    </div>
+    <div class="writing-grid">
+
+      <a class="post" href="#" target="_blank" rel="noopener">
+        <p class="post-date">2025</p>
+        <h3>Parsing LaTeX without losing my mind</h3>
+        <p>What broke first when I wired the Gemini API into a LaTeX parser, and the one validation step that stopped garbage input from becoming garbage output.</p>
+        <span class="post-link">Read the post →</span>
+      </a>
+
+      <a class="post" href="#" target="_blank" rel="noopener">
+        <p class="post-date">2025</p>
+        <h3>Building a dependency-free Java pattern engine</h3>
+        <p>Why I skipped every library for the Word Art Generator, and what that constraint taught me about clean separation of concerns.</p>
+        <span class="post-link">Read the post →</span>
+      </a>
+
+      <a class="post" href="#" target="_blank" rel="noopener">
+        <p class="post-date">2024</p>
+        <h3>What two years as class rep taught me about debugging people, not just code</h3>
+        <p>Coordinating a class of 75 has more in common with triaging a bug backlog than I expected — on prioritizing, listening, and closing the loop.</p>
+        <span class="post-link">Read the post →</span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════
+     SKILLS — UPDATE: add/remove <li> items in either list;
+     the two skill categories are independent, edit either freely
+     ══════════════════════════════════════════════════════════════ -->
+<section id="skills">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="tag">05 — Skills</p>
+      <h2>What I build with.</h2>
+    </div>
+    <div class="skills-grid">
+
+      <div>
+        <div class="skill-block">
+          <h4>Languages &amp; Core</h4>
+          <ul class="tag-row">
+            <li>Java (OOP)</li><li>Python</li><li>Collections</li><li>Exception Handling</li><li>Multithreading</li>
+          </ul>
+        </div>
+        <div class="skill-block">
+          <h4>Backend &amp; APIs</h4>
+          <ul class="tag-row">
+            <li>Spring Boot</li><li>FastAPI</li><li>Servlets / JSP</li><li>REST API design &amp; testing</li>
+          </ul>
+        </div>
+        <div class="skill-block">
+          <h4>Data &amp; AI/ML</h4>
+          <ul class="tag-row">
+            <li>PostgreSQL</li><li>MySQL</li><li>NumPy</li><li>Pandas</li><li>Machine Learning</li><li>LangChain</li><li>Google Gemini API</li>
+          </ul>
+        </div>
+        <div class="skill-block">
+          <h4>Tools, Practices &amp; Fundamentals</h4>
+          <ul class="tag-row">
+            <li>Git / GitHub</li><li>Linux (Ubuntu)</li><li>Data Structures &amp; Algorithms</li><li>Operating Systems</li><li>DBMS</li><li>Computer Networks</li><li>Agile-ready</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <h4 style="font-family:var(--sans); font-weight:500; font-size:0.95rem; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--line);">Soft Skills</h4>
+        <ul class="soft-list">
+          <li>Problem-solving &amp; analytical thinking</li>
+          <li>Debugging mindset</li>
+          <li>Communication</li>
+          <li>Teamwork &amp; cross-team collaboration</li>
+          <li>Time management &amp; precision under pressure</li>
+          <li>Self-learning &amp; growth mindset</li>
+          <li>Critical thinking</li>
+          <li>Customer-service orientation</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════
+     EDUCATION, CERTIFICATIONS & LEADERSHIP
+     UPDATE: add rows/items following the existing pattern
+     ══════════════════════════════════════════════════════════════ -->
+<section id="education">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="tag">06 — Education</p>
+      <h2>Academics &amp; activities.</h2>
+    </div>
+    <div class="two-col">
+
+      <div>
+        <div class="edu-item">
+          <h4>Master of Computer Applications (MCA) — Pursuing</h4>
+          <p class="edu-meta">Axis Business School, Kanpur (AKTU, Lucknow) · 2025 – 2027</p>
+        </div>
+        <div class="edu-item">
+          <h4>Bachelor of Computer Applications (BCA) — 70.20%</h4>
+          <p class="edu-meta">Axis Institute of Higher Education, Kanpur (CSJMU) · 2025</p>
+        </div>
+        <div class="edu-item">
+          <h4>Higher Secondary — 79.80%</h4>
+          <p class="edu-meta">Vidya Niketan Inter College, Kanpur (U.P. Board) · 2021</p>
+        </div>
+        <div class="edu-item">
+          <h4>Senior Secondary — 79.00%</h4>
+          <p class="edu-meta">Vidya Niketan Inter College, Kanpur (U.P. Board) · 2019</p>
+        </div>
+
+        <ul class="cert-list">
+          <li>Java Certified Foundations Associate <span>Skillsoft</span></li>
+          <li>Intro to Generative AI <span>Google Cloud · Dec 2025</span></li>
+          <li>Hands-on Linux with Ubuntu <span>Udemy · 2026</span></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="lead-item">
+          <h4>Class Representative, BCA</h4>
+          <p>2022–2025 · Primary point of contact between faculty and a class of 75 students, coordinating academic activities and communications.</p>
+        </div>
+        <div class="lead-item">
+          <h4>Core Volunteer, Volunteering Orientation</h4>
+          <p>2024 · Supported planning and on-ground coordination for an event of 270 participants.</p>
+        </div>
+        <div class="lead-item">
+          <h4>Code Spark — College Coding Event</h4>
+          <p>Cleared the first round with the highest marks, reflecting strong analytical ability.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════════
+     CONTACT — UPDATE: replace the LinkedIn/GitHub href="#" placeholders
+     with your real profile URLs. The form works without a backend
+     (it opens the visitor's email client via mailto:); see the JS
+     comment below for how to wire it to a real form service instead.
+     ══════════════════════════════════════════════════════════════ -->
+<section id="contact">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="tag">07 — Contact</p>
+      <h2>Let's talk.</h2>
+      <p>Open to Software Engineering and HR internship opportunities — remote or on-site, and open to relocation.</p>
+    </div>
+    <div class="contact-grid">
+
+      <div class="contact-links">
+        <!-- UPDATE: replace resume.pdf with the path to your actual PDF resume -->
+        <a href="resume.pdf" download class="btn btn-primary resume-btn">Download Resume (PDF) <span aria-hidden="true">↓</span></a>
+        <a href="mailto:Vishalkashyap4511@gmail.com">Email <span class="sub">Vishalkashyap4511@gmail.com</span></a>
+        <a href="tel:+917355156383">Phone <span class="sub">+91 7355 156 383</span></a>
+        <!-- UPDATE: replace href="#" with your actual profile links -->
+        <a href="#" target="_blank" rel="noopener">LinkedIn <span class="sub">linkedin.com/in/your-handle</span></a>
+        <a href="#" target="_blank" rel="noopener">GitHub <span class="sub">github.com/your-handle</span></a>
+        <a href="#">Location <span class="sub">Kanpur, India · open to relocation</span></a>
+      </div>
+
+      <form id="contactForm">
+        <div class="form-row">
+          <div>
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+        </div>
+        <div>
+          <label for="message">Message</label>
+          <textarea id="message" name="message" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Send message</button>
+        <p class="form-note">Opens your email client with this message pre-filled and addressed to Vishal.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>&copy; <span id="year"></span> Vishal Kashyap. Built with clean HTML, CSS &amp; JS — no framework required.</p>
+    <div class="socials">
+      <!-- UPDATE: keep in sync with the contact links above -->
+      <a href="#" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="#" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:Vishalkashyap4511@gmail.com">Email</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// MOBILE NAV TOGGLE
+// ══════════════════════════════════════════════════════════════
+const navToggle = document.getElementById('navToggle');
+const navLinks = document.getElementById('navLinks');
+navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+// ══════════════════════════════════════════════════════════════
+// THEME + TORCH MODE + CUSTOM CURSOR
+// Dark mode is stored in localStorage and re-applied on the next visit
+// (falling back to the visitor's OS-level color-scheme preference the
+// first time). While dark mode is on: a torch-beam spotlight follows the
+// mouse (or a finger, on touch) and lights up whichever section it's
+// over; the real OS cursor is swapped for a small glowing dot with a
+// fading spark trail behind it, in the current accent colors. All of it
+// is purely decorative (pointer-events:none) and is skipped entirely for
+// anyone who has prefers-reduced-motion set, so it never gets in the way
+// of clicking, tapping, or reading.
+// ══════════════════════════════════════════════════════════════
+(function(){
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  const torchOverlay = document.getElementById('torchOverlay');
+  const torchBeam = document.getElementById('torchBeam');
+  const cursorDot = document.getElementById('cursorDot');
+  const trailCanvas = document.getElementById('cursorTrailCanvas');
+  const trailCtx = trailCanvas.getContext('2d');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // --- spark trail (canvas) -------------------------------------------
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let trailPoints = [];
+  let trailColors = ['#A78BFA', '#FB7185'];
+  let trailRAF = null;
+
+  function sizeTrailCanvas(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    trailCanvas.width = window.innerWidth * dpr;
+    trailCanvas.height = window.innerHeight * dpr;
+    trailCanvas.style.width = window.innerWidth + 'px';
+    trailCanvas.style.height = window.innerHeight + 'px';
+    trailCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function refreshTrailColors(){
+    const styles = getComputedStyle(root);
+    const a = styles.getPropertyValue('--accent').trim();
+    const b = styles.getPropertyValue('--accent-2').trim();
+    if (a && b) trailColors = [a, b];
+  }
+
+  function addTrailPoint(x, y){
+    trailPoints.push({ x, y, life: 1, color: trailColors[Math.floor(Math.random() * trailColors.length)] });
+    if (trailPoints.length > 16) trailPoints.shift();
+  }
+
+  function tickTrail(){
+    trailCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    trailPoints.forEach(p => { p.life -= 0.06; });
+    trailPoints = trailPoints.filter(p => p.life > 0);
+    trailPoints.forEach(p => {
+      trailCtx.globalAlpha = Math.max(p.life * 0.55, 0);
+      trailCtx.fillStyle = p.color;
+      trailCtx.beginPath();
+      trailCtx.arc(p.x, p.y, 3 + (1 - p.life) * 3, 0, Math.PI * 2);
+      trailCtx.fill();
+    });
+    trailCtx.globalAlpha = 1;
+    trailRAF = requestAnimationFrame(tickTrail);
+  }
+
+  function startTrailLoop(){
+    if (trailRAF) return;
+    refreshTrailColors();
+    trailRAF = requestAnimationFrame(tickTrail);
+  }
+
+  function stopTrailLoop(){
+    if (trailRAF){ cancelAnimationFrame(trailRAF); trailRAF = null; }
+    trailCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    trailPoints = [];
+  }
+
+  sizeTrailCanvas();
+  let trailResizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(trailResizeTimer);
+    trailResizeTimer = setTimeout(sizeTrailCanvas, 200);
+  });
+
+  // --- theme + torch ----------------------------------------------------
+  function applyTheme(theme){
+    root.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    themeIcon.textContent = theme === 'dark' ? '🔦' : '🌙';
+    const torchOn = theme === 'dark' && !reduceMotion;
+    torchOverlay.classList.toggle('active', torchOn);
+    torchBeam.classList.toggle('active', torchOn);
+    cursorDot.classList.toggle('active', torchOn);
+    if (torchOn){ startTrailLoop(); } else { stopTrailLoop(); }
+  }
+
+  const savedTheme = localStorage.getItem('theme')
+    || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  applyTheme(savedTheme);
+
+  themeToggle.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+  });
+
+  function moveTorch(x, y){
+    root.style.setProperty('--torch-x', x + 'px');
+    root.style.setProperty('--torch-y', y + 'px');
+    torchBeam.style.left = x + 'px';
+    torchBeam.style.top = y + 'px';
+    cursorDot.style.left = x + 'px';
+    cursorDot.style.top = y + 'px';
+    if (root.getAttribute('data-theme') === 'dark' && !reduceMotion) addTrailPoint(x, y);
+  }
+
+  window.addEventListener('mousemove', (e) => {
+    if (root.getAttribute('data-theme') !== 'dark' || reduceMotion) return;
+    moveTorch(e.clientX, e.clientY);
+  });
+  window.addEventListener('touchmove', (e) => {
+    if (root.getAttribute('data-theme') !== 'dark' || reduceMotion) return;
+    const t = e.touches[0];
+    if (t) moveTorch(t.clientX, t.clientY);
+  }, { passive:true });
+})();
+
+// ══════════════════════════════════════════════════════════════
+// FOOTER YEAR
+// ══════════════════════════════════════════════════════════════
+document.getElementById('year').textContent = new Date().getFullYear();
+
+// ══════════════════════════════════════════════════════════════
+// CONTACT FORM
+// Currently a zero-backend mailto: handoff — works on any static host
+// (GitHub Pages, Netlify, etc.) with no server required.
+//
+// TO CONNECT A REAL BACKEND INSTEAD (recommended for production):
+//   1. Sign up for a form service such as Formspree, Getform, or EmailJS.
+//   2. Replace the submit handler body below with a fetch() POST to
+//      that service's endpoint, e.g.:
+//        fetch('https://formspree.io/f/your-id', {
+//          method:'POST', headers:{'Accept':'application/json'}, body:new FormData(form)
+//        });
+//   3. Remove the window.location.href line once the fetch call is in place.
+// ══════════════════════════════════════════════════════════════
+const contactForm = document.getElementById('contactForm');
+contactForm.addEventListener('submit', function(e){
+  e.preventDefault();
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const message = document.getElementById('message').value;
+  const subject = encodeURIComponent(`Portfolio contact from ${name}`);
+  const body = encodeURIComponent(`${message}\n\n— ${name} (${email})`);
+  window.location.href = `mailto:Vishalkashyap4511@gmail.com?subject=${subject}&body=${body}`;
+});
+// ══════════════════════════════════════════════════════════════
+// ANIMATED BACKGROUND — floating tech symbols on a fixed canvas.
+// Purely decorative: pointer-events are disabled in CSS and it sits
+// behind every section, so it never affects layout or interaction.
+//
+// TO CUSTOMIZE:
+//   - SYMBOLS: swap/add the characters that float around.
+//   - COUNT: how many symbols drift on screen at once.
+//   - SPEED: overall drift speed multiplier (higher = faster).
+//   - COLORS: set in the `colors` array below — kept in sync with the site's
+//     --accent / --accent-2 CSS variables, so update both together if you
+//     change the theme.
+// ══════════════════════════════════════════════════════════════
+(function(){
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const SYMBOLS = ['</>', '{ }', '01', '10', '#', '{;}', 'λ', '⚙', '☁', '✦', '◈', '∑']; // UPDATE: symbol set
+  const COUNT = window.innerWidth < 700 ? 14 : 26;                                     // UPDATE: density (fewer on mobile)
+  const SPEED = 1;                                                                     // UPDATE: overall speed
+
+  const colors = ['rgba(124,58,237,ALPHA)', 'rgba(244,63,94,ALPHA)']; // violet / rose, alpha filled in per-symbol
+
+  let W, H, dpr, particles = [];
+
+  function size(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function makeParticle(){
+    const alpha = (0.16 + Math.random() * 0.22).toFixed(2); // clearly visible, but light enough to stay behind foreground text
+    return {
+      symbol: SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+      x: Math.random() * W,
+      y: Math.random() * H,
+      size: 20 + Math.random() * 30,
+      vx: (Math.random() - 0.5) * 0.15 * SPEED,
+      vy: (-0.1 - Math.random() * 0.25) * SPEED, // gentle upward drift
+      rot: Math.random() * Math.PI * 2,
+      vrot: (Math.random() - 0.5) * 0.0025,
+      color: colors[Math.floor(Math.random() * colors.length)].replace('ALPHA', alpha)
+    };
+  }
+
+  function init(){
+    size();
+    particles = Array.from({ length: COUNT }, makeParticle);
+    if (reduceMotion){ drawStaticFrame(); } else { requestAnimationFrame(tick); }
+  }
+
+  function drawStaticFrame(){
+    // Respect prefers-reduced-motion: render one calm frame, no animation loop at all.
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => drawParticle(p));
+  }
+
+  function drawParticle(p){
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.font = `500 ${p.size}px 'IBM Plex Mono', monospace`;
+    ctx.fillStyle = p.color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(p.symbol, 0, 0);
+    ctx.restore();
+  }
+
+  function tick(){
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.rot += p.vrot;
+      // wrap around edges with a little padding so symbols fade in/out at the border
+      if (p.y < -40) p.y = H + 40;
+      if (p.x < -40) p.x = W + 40;
+      if (p.x > W + 40) p.x = -40;
+      drawParticle(p);
+    });
+    requestAnimationFrame(tick);
+  }
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { size(); }, 200);
+  });
+
+  // Pause the animation loop when the tab isn't visible, to save battery/CPU.
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && !reduceMotion) requestAnimationFrame(tick);
+  });
+
+  init();
+})();
+
+// ══════════════════════════════════════════════════════════════
+// SOUND TOGGLE — off by default. Every click/hover blip is generated
+// on the fly with the Web Audio API (no audio files to load), so
+// turning it on costs nothing until it's actually used. Preference is
+// remembered in localStorage.
+// ══════════════════════════════════════════════════════════════
+(function(){
+  const soundToggle = document.getElementById('soundToggle');
+  const soundIcon = document.getElementById('soundIcon');
+  let soundOn = localStorage.getItem('soundOn') === 'true';
+  let audioCtx = null;
+
+  function updateIcon(){ soundIcon.textContent = soundOn ? '🔊' : '🔈'; }
+  updateIcon();
+
+  function ensureAudioCtx(){
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  function playTone(freq, duration, volume){
+    if (!soundOn) return;
+    const ctx = ensureAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = volume;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+    osc.stop(ctx.currentTime + duration);
+  }
+
+  window.playHoverSound = () => playTone(880, 0.05, 0.02);
+  window.playClickSound = () => playTone(520, 0.12, 0.05);
+  window.playEggSound = () => { playTone(659, 0.12, 0.05); setTimeout(() => playTone(988, 0.18, 0.05), 110); };
+  window.isSoundOn = () => soundOn;
+
+  soundToggle.addEventListener('click', () => {
+    soundOn = !soundOn;
+    localStorage.setItem('soundOn', String(soundOn));
+    updateIcon();
+    if (soundOn) playClickSound();
+  });
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => window.playHoverSound());
+    el.addEventListener('click', () => window.playClickSound());
+  });
+})();
+
+// ══════════════════════════════════════════════════════════════
+// KONAMI CODE EASTER EGG — ↑ ↑ ↓ ↓ ← → ← → B A unlocks a few seconds
+// of classic matrix-style falling code, plus a little "achievement
+// unlocked" toast. A nod to the engineering side of this portfolio.
+// Built entirely on the fly (its own canvas + toast, no extra markup),
+// and cleans itself up afterwards.
+// ══════════════════════════════════════════════════════════════
+(function(){
+  const sequence = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  let progress = 0;
+  let eggActive = false;
+
+  function triggerEasterEgg(){
+    if (eggActive) return;
+    eggActive = true;
+    if (window.playEggSound) window.playEggSound();
+
+    const canvas = document.createElement('canvas');
+    canvas.id = 'matrixRainCanvas';
+    canvas.setAttribute('aria-hidden', 'true');
+    canvas.style.cssText = 'position:fixed;inset:0;z-index:200;pointer-events:none;';
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const chars = '01アイウエオカキクケコ<>{}();=+*/'.split('');
+    const fontSize = 16;
+    const columns = Math.ceil(window.innerWidth / fontSize);
+    const drops = Array.from({ length: columns }, () => Math.random() * -50);
+
+    const toast = document.createElement('div');
+    toast.className = 'egg-toast';
+    toast.textContent = "🎮 Achievement unlocked: Konami Coder — you found the easter egg.";
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    let frame = 0;
+    const maxFrames = 260; // roughly a few seconds at 60fps
+    let rafId;
+
+    function draw(){
+      ctx.fillStyle = 'rgba(2,4,3,0.14)';
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+      ctx.font = fontSize + 'px monospace';
+      ctx.fillStyle = '#3FE07A';
+      drops.forEach((y, i) => {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        const x = i * fontSize;
+        ctx.fillText(text, x, y * fontSize);
+        drops[i] = y * fontSize > window.innerHeight && Math.random() > 0.975 ? 0 : y + 1;
+      });
+      frame++;
+      if (frame < maxFrames){
+        rafId = requestAnimationFrame(draw);
+      } else {
+        cleanup();
+      }
+    }
+
+    function cleanup(){
+      if (rafId) cancelAnimationFrame(rafId);
+      toast.classList.remove('show');
+      setTimeout(() => {
+        canvas.remove();
+        toast.remove();
+        eggActive = false;
+      }, 400);
+    }
+
+    draw();
+    console.log('%c🎮 Konami code accepted. Nice one.', 'color:#3FE07A;font-family:monospace;font-size:14px;');
+  }
+
+  window.addEventListener('keydown', (e) => {
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    const expected = sequence[progress];
+    if (key === expected){
+      progress++;
+      if (progress === sequence.length){
+        triggerEasterEgg();
+        progress = 0;
+      }
+    } else {
+      progress = (key === sequence[0]) ? 1 : 0;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
